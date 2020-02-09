@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.15.0/d3.js" integrity="sha256-BANs9QteeZKuqwQcdddFZlWLLyUCIke5Nn80f8B5G3g=" crossorigin="anonymous"></script> -->
+<script type="text/javascript" src="../lib/d3.v5.min.js"></script>
+<style>
+
+    .line {
+        stroke-width: 2;
+        fill: none;
+    }
+
+    .axis path,
+    .axis line {
+        fill: none;
+        stroke: grey;
+        stroke-width: 1;
+        shape-rendering: crispEdges;
+    }
+
+
+</style>
+<body>
+<script>
+
+    d3.dsv(",", "earthquakes.csv", (d)=>{
+        return {
+            year: new Date (d.year, 0),
+            seven : parseInt(d["7_7.9"]),
+            eight: parseInt(d["8.0+"]),
+            six : parseInt(d["6_6.9"]),
+            five: parseInt(d["5_5.9"]),
+            deaths: parseInt(d["Estimated Deaths"])
+        }
+    }).then((dataset) =>{
+        
+        var vertical_p = 50
+        var hori_p = 50
+        var w = 1000 - hori_p*2
+        var h = 500 - hori_p*2
+        var x_max = d3.max(dataset, (d) => {return d.year})
+        var x_min = d3.min(dataset, (d) => {return d.year})
+        var d_max = d3.max(dataset, (d) => {return d.deaths})
+        var d_min = d3.min(dataset, (d) => {return d.deaths})
+        var x_scale = d3.scaleTime().domain([x_min, x_max]).range([0, w])
+        var y_scale1 = d3.scaleLinear().domain([0,2276]).range([h,0])
+        var d_scale = d3.scaleLinear().domain([d_min, d_max]).range([3,10])
+
+        var x_axis = d3.axisBottom(x_scale).ticks(d3.timeYear.every(1))
+        var y_axis1 = d3.axisLeft(y_scale1)
+
+        var line5 = d3.line().x((d)=>{return x_scale(d.year)}).y( (d)=>{return y_scale1(d.five)})
+        var line6 = d3.line().x((d)=>{return x_scale(d.year)}).y( (d)=>{return y_scale1(d.six)})
+        var line7 = d3.line().x((d)=>{return x_scale(d.year)}).y( (d)=>{return y_scale1(d.seven)})
+        var line8 = d3.line().x((d)=>{return x_scale(d.year)}).y( (d)=>{return y_scale1(d.eight)})
+
+
+        var svg1 = d3.select("body").append("svg").attr("width", w +hori_p*2).attr("height", h+ vertical_p*2).append("g").attr("transform", "translate(" + hori_p + ", " + vertical_p + ")");
+        svg1.append("g").attr("transform", "translate(0," + h + ")").call(x_axis)
+        svg1.append("g").attr("transform", "translate(0," + 0 + ")").call(y_axis1)
+        svg1.append("path").datum(dataset).attr("class", "line").attr("d", line5).style("stroke", '#FFC300')
+        svg1.append("path").datum(dataset).attr("class", "line").attr("d", line6).style("stroke", '#FF5733')
+        svg1.append("path").datum(dataset).attr("class", "line").attr("d", line7).style("stroke", '#C70039')
+        svg1.append("path").datum(dataset).attr("class", "line").attr("d", line8).style("stroke", '#900C3F')
+        svg1.append("g").append('text').attr('class', 'title').attr('y', -20).attr('x', (w)/2).text("Earthquake Statistics for "+ x_min.getFullYear() + "-" + x_max.getFullYear()).style("text-anchor","middle").style("font-size", "18px").style("font-weight", "bold") 
+
+        // var line5b = d3.line().x((d)=>{return x_scale(d.year)}).y( (d)=>{return y_scale1(d.five)})
+        // var line6b = d3.line().x((d)=>{return x_scale(d.year)}).y( (d)=>{return y_scale1(d.six)})
+        // var line7b = d3.line().x((d)=>{return x_scale(d.year)}).y( (d)=>{return y_scale1(d.seven)})
+        // var line8b = d3.line().x((d)=>{return x_scale(d.year)}).y( (d)=>{return y_scale1(d.eight)})
+
+        var tri = d3.symbol().type(d3.symbolTriangle)
+        var svg2 = d3.select("body").append("svg").attr("width", w +hori_p*2).attr("height", (h+ vertical_p*2)*2).append("g").attr("transform", "translate(" + hori_p + ", " + vertical_p + ")");
+        svg2.append("g").attr("transform", "translate(0," + h + ")").call(x_axis)
+        svg2.append("g").attr("transform", "translate(0," + 0 + ")").call(y_axis1)
+        svg2.append("path").datum(dataset).attr("class", "line").attr("d", line5).style("stroke", '#FFC300')
+        svg2.append("path").datum(dataset).attr("class", "line").attr("d", line6).style("stroke", '#FF5733')
+        svg2.append("path").datum(dataset).attr("class", "line").attr("d", line7).style("stroke", '#C70039')
+        svg2.append("path").datum(dataset).attr("class", "line").attr("d", line8).style("stroke", '#900C3F')
+        svg2.append("g").append('text').attr('class', 'title').attr('y', -20).attr('x', (w)/2).text("Earthquake Statistics for "+ x_min.getFullYear() + "-" + x_max.getFullYear()).style("text-anchor","middle").style("font-size", "18px").style("font-weight", "bold") 
+
+        svg2.selectAll(".circ").data(dataset).enter().append("circle").attr("class", "circ").attr("cx", (d) =>{ return x_scale(d.year)}).attr("cy", (d)=>{ return y_scale1(d.five)}).attr("r", (d)=>{return d_scale(d.deaths)}).style("fill", "#FFC300")
+        svg2.selectAll(".triangle").data(dataset).enter().append(tri).attr("class", "triangle").attr('transform', (d)=> {return "translate("+ x_scale(d.year)+","+y_scale1(d.six)}).style("fill", "#FF5733")
+        // attr("x", (d) =>{ return x_scale(d.year)}).attr("y", (d)=>{ return y_scale1(d.six)}).style("fill", "#FFC300")
+    
+    })
+
+
+</script>
+</body>
+</html>
