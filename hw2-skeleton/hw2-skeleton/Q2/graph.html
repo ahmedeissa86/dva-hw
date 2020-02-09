@@ -300,11 +300,17 @@ links.forEach(function(link) {
     
 });
 
-console.log(links)
-console.log(d3.values(links))
+// console.log(links)
+// console.log(d3.values(links))
 var width = 1200,
     height = 700;
 
+var d_max = d3.max(links, (d) => { return d.source.weight})
+
+var scale = d3.scaleLinear().domain([0, d_max]).range([2, 27])
+var colorScale = d3.scaleLinear().domain([0, d_max]).range(["#ffffb2", "#bd0026"])
+
+// console.log(d_max)
 var force = d3.forceSimulation()
     .nodes(d3.values(nodes))
     .force("link", d3.forceLink(links).distance(100))
@@ -336,6 +342,7 @@ var node = svg.selectAll(".node")
     .data(force.nodes())
     .enter().append("g")
     .attr("class", "node")
+    .on("dblclick", release)
     .call(d3.drag()
         .on("start", dragstarted)
         .on("drag", dragged)
@@ -344,12 +351,14 @@ var node = svg.selectAll(".node")
 // add the nodes
 node.append("circle")
     .attr("r", (d)=>{
-      return 1 + d.weight*3
-    });
+      return scale(d.weight)
+    }).style("fill", function(d){
+        return colorScale(d.weight)
+      });
 
 node.append("text").attr("x", 10).attr("y", 15).text(function(d) {return d.name})
 
-
+svg.append("g").append('text').attr('class', 'title').attr('y', 50).attr('x', width-50).text("aeissa3").style("text-anchor","end").style("font-size", "12px")
 // add the curvy lines
 function tick() {
     path.attr("d", function(d) {
@@ -368,6 +377,7 @@ function tick() {
         .attr("transform", function(d) {
         return "translate(" + d.x + "," + d.y + ")"; })
 };
+// add color gradient
 
 function dragstarted(d) {
     if (!d3.event.active) force.alphaTarget(0.3).restart();
@@ -381,17 +391,18 @@ function dragged(d) {
 };
 
 function dragended(d) {
-    if (!d3.event.active) force.alphaTarget(0);
-    if (d.fixed == true) {
-        d.fx = d.x;
-        d.fy = d.y;
-    }
-    else {
-        d.fx = null;
-        d.fy = null;
+    if (!d3.event.active) {
+    force.alphaTarget(0);
+    d3.select(this).select('circle').transition().duration(750).style("fill", "#2ca25f")
     }
 };
 
+function release(d) {
+
+  d3.select(this).select('circle').transition().duration(750).style("fill", colorScale(d.weight))
+  d.fx = null
+  d.fy = null
+}
 </script>
 </body>
 </html>
