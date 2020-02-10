@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<script type="text/javascript" src="../lib/d3.v5.min.js"></script>
+<style>
+
+    .line {
+        stroke-width: 2;
+        fill: none;
+    }
+
+    .axis path,
+    .axis line {
+        fill: none;
+        stroke: grey;
+        stroke-width: 1;
+        shape-rendering: crispEdges;
+    }
+
+</style>
+<body>
+<script>
+
+    d3.dsv(",", "state-year-earthquakes.csv", (d)=>{
+        return {
+            year: new Date (d.year, 0),
+            region: d.region,
+            state: d.state,
+            count: parseInt (d.count)
+        }
+    }).then((dataset) =>{
+    
+        let refined = {}
+        dataset.forEach((element, i) => {
+            var year = element.year.getFullYear().toString()
+            // console.log(i)
+            // console.log(element)
+            // console.log ((refined[year]==undefined))
+
+            if (refined[year]==undefined){
+                refined[year]= {date: element.year}
+                refined[year][element.region] = {total: element.count}
+                refined[year][element.region][element.state] = element.count
+
+            } else {
+                // console.log (refined[year][element.region] == undefined)
+               if ( refined[year][element.region] == undefined){
+                    refined[year][element.region] = {total: element.count}
+                    refined[year][element.region][element.state] = element.count
+               } else {
+                    
+                    refined[year][element.region]["total"] = element.count + refined[year][element.region]["total"]
+                    refined[year][element.region][element.state] = element.count
+               }
+            }
+
+            
+           
+        });
+        console.log(JSON.stringify(refined, null, 2))
+
+        var regions = []
+
+        for (const k in refined){
+
+            var temp = {
+                year: refined[k]["date"],
+                min: 1000000000,
+                max: 0,
+            }
+
+            for (const v in refined[k]){
+                // console.log(v)
+                if (v != "date"){
+                    var count = parseInt(refined[k][v]["total"])
+                    // console.log(v)
+                    // console.log(count)
+                    temp[v] = count
+                    if (count > temp.max)
+                        temp.max = count
+                    if (count < temp.min)
+                        temp.min = count
+                }
+            }
+
+            regions.push(temp)
+        }
+
+        console.log(regions)
+
+        var vertical_p = 50
+        var hori_p = 50
+        var w = 1000 - hori_p*2
+        var h = 650 - hori_p*2
+        var labels = ["Midwest", "Northeast", "South", "West"]
+        var colors = ['#FFC300', '#FF5733', '#C70039', '#900C3F']
+        var radius = 3
+        //X AXIS
+
+        var x_max = d3.max(regions, (d) => {return d.year})
+        var x_min = d3.min(regions, (d) => {return d.year})
+        var x_scale = d3.scaleTime().domain([x_min, x_max]).range([0, w-hori_p])
+        var x_axis = d3.axisBottom(x_scale).ticks(d3.timeYear.every(1))
+
+        // Y AXIS
+
+        var y_max = d3.max(regions, (d) => {return d.max})
+        var y_min = d3.min(regions, (d) => {return d.min})
+        var y_scale = d3.scaleLinear().domain([y_min, y_max+500]).range([h,0])
+        var y_axis = d3.axisLeft(y_scale)
+
+        var midwest = d3.line().x((d)=>{return x_scale(d.year)}).y((d)=>{ return y_scale(d.Midwest)})
+        var northeast = d3.line().x((d)=>{return x_scale(d.year)}).y((d)=>{ return y_scale(d.Northeast)})
+        var south = d3.line().x((d)=>{return x_scale(d.year)}).y((d)=>{return y_scale(d.South)})
+        var west = d3.line().x((d)=>{return x_scale(d.year)}).y((d)=>{return y_scale(d.West)})
+
+        var svg1 = d3.select("body").append("svg").attr("width", w +hori_p*2).attr("height", h+ vertical_p*2).append("g").attr("transform", "translate(" + hori_p + ", " + vertical_p + ")");
+        svg1.append("g").attr("transform", "translate(0," + h + ")").call(x_axis)
+        svg1.append("g").attr("transform", "translate(0," + 0 + ")").call(y_axis)
+        svg1.append("g").append('text').attr('class', 'title').attr('y', -20).attr('x', (w)/2).text("US Earthquakes by Region "+ x_min.getFullYear() + "-" + x_max.getFullYear()).style("text-anchor","middle").style("font-size", "20px").style("font-weight", "bold")
+        svg1.append("g").append('text').attr('class', 'title').attr('y', 5).attr('x', w/2).text("aeissa3").style("text-anchor","center").style("font-size", "16px")
+        svg1.append("path").datum(regions).attr("class", "line").attr("d", midwest).style("stroke", '#FFC300')
+        svg1.append("path").datum(regions).attr("class", "line").attr("d", northeast).style("stroke", '#FF5733')
+        svg1.append("path").datum(regions).attr("class", "line").attr("d", south).style("stroke", '#C70039')
+        svg1.append("path").datum(regions).attr("class", "line").attr("d", west).style("stroke", '#900C3F')
+        
+
+        // svg1.selectAll(".circ").data(regions).enter().append("circle").attr("class", "circ").attr("cx", (d) =>{ return x_scale(d.year)}).attr("cy", (d)=>{ return y_scale(d[labels[0]])}).attr("r", radius).style("fill", colors[0]).on("mouseover", mouseOver).on("mouseout", mouseOut)
+        // svg1.selectAll(".circ").data(regions).enter().append("circle").attr("class", "circ").attr("cx", (d) =>{ return x_scale(d.year)}).attr("cy", (d)=>{ return y_scale(d[labels[1]]).attr("r", radius).style("fill", colors[1]).on("mouseover", mouseOver).on("mouseout", mouseOut)
+        
+        
+        labels.forEach((label, i)=>{
+            svg1.selectAll(label).data(regions).enter().append("circle").attr("class", label).attr("cx", (d) =>{ return x_scale(d.year)}).attr("cy", (d)=>{ return y_scale(d[label])}).style("stroke", "white").attr("r", radius).style("fill", colors[i]).on("mouseover", handleMouseOver).on("mouseout", handleMouseOut);
+            
+            svg1.append("g").append("circle").attr("cx", w -200).attr("cy", (25*i)).attr("r", 8).style("fill", colors[i])
+            svg1.append("g").append('text').attr("x", w-185).attr("y", 5+  (25*i)).text(labels[i]).style("font-size", "14px").style("font-weight", "bold")
+        })
+
+        svg1.selectAll("circle")
+        
+
+        function handleMouseOver(d, i){
+            d3.select(this).attr("r", radius *3)
+            getData(d.year.getFullYear().toString(),d3.select(this).attr("class") )
+        }
+
+        function handleMouseOut(d, i) {
+            d3.select(this).attr("r", radius)
+        }
+
+        function getData (year, region){
+            console.log (year + " " + region)
+        }
+
+    
+    }).catch((error)=>{console.log(error)})
+
+
+</script>
+</body>
+</html>
