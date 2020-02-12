@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <meta charset="utf-8">
 <script type="text/javascript" src="../lib/d3.v5.min.js"></script>
@@ -91,7 +93,7 @@
         var vertical_p = 50
         var hori_p = 50
         var w = 1000 - hori_p*2
-        var h = 650 - hori_p*2
+        var h = 650 - vertical_p*2
         var labels = ["Midwest", "Northeast", "South", "West"]
         var colors = ['#FFC300', '#FF5733', '#C70039', '#900C3F']
         var radius = 3
@@ -157,11 +159,10 @@
         }
 
         function mouseOut(d, i) {
-            // d3.select(this).attr("r", radius)
-            // states = []
-            // var element = document.getElementById('#barchart')
-            // element.parentNode.removeChild(element)
-            // console.log(states)
+            d3.select(this).attr("r", radius)
+            states = []
+            var element = document.getElementById('#barchart')
+            element.parentNode.removeChild(element)
         }
 
         function getData (year, region){

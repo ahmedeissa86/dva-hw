@@ -35,7 +35,7 @@
         var vertical_p = 50
         var hori_p = 50
         var w = 1000 - hori_p*2
-        var h = 500 - hori_p*2
+        var h = 500 - vertical_p*2
         var x_max = d3.max(dataset, (d) => {return d.year})
         var x_min = d3.min(dataset, (d) => {return d.year})
         var d_max = d3.max(dataset, (d) => {return d.deaths})
