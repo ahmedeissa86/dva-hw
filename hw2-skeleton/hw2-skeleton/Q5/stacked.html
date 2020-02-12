@@ -21,11 +21,10 @@
 </style>
 <body>
 
-    <div>
-        <select id="select" style="margin-left: 75px;">
-            <option value = "2017" selected>2017</option>
-            <option value = "2018">2018</option>
-        </select>
+    <div id="div" style="margin-left: 25px;">
+    </div>
+
+    <div id="div2">
     </div>
 <script>
 
@@ -68,18 +67,24 @@
 
         
         // y_axis.attr("id", "yScale")
-
-        var svg = d3.select("body").append("svg").attr("class", "chart").attr("width", w +hori_p*2).attr("height", h+ vertical_p*2).append("g").attr("transform", "translate(" + hori_p + ", " + vertical_p + ")");
+        // d3.select("#button").selectAll(".options").data(years).enter().append('option').text((d)=>{return d}).attr("value", (d)=>{return d})
+        var select = d3.select('#div').append('select').attr('class','select').on('change',change).attr("transform", "translate(0,0")
+        var options = select.selectAll('option').data(years).enter().append('option').text(function (d) { return d; });
+        
+        var svg = d3.select("#div2").append("svg").attr("class", "chart").attr("width", w +hori_p*2).attr("height", h+ vertical_p*2).append("g").attr("transform", "translate(" + hori_p + ", " + vertical_p + ")");
         svg.append("g").attr("transform", "translate(0," + h + ")").call(x_axis)
         var y_scale = d3.scaleLinear().range([h, 0]).domain([0, d3.max(seventeen, (d)=>{ return d.total})])
         var y_axis = d3.axisLeft(y_scale)
         var get_yAxis = svg.append("g").attr("id", "yAxis").attr("transform", "translate(0, 0)").call(y_axis)
-        console.log(seventeen)
+        
         var five = svg.selectAll(".five").data(seventeen).enter().append("rect").attr("class", "five").attr("x", (d)=>{return x_scale(d.state)}).attr("width", x_scale.bandwidth()).attr("y", (d)=>{return y_scale(d.five)}).attr("height", (d)=>{return h - y_scale(d.five)}).style("fill", "#f2b447")
         var six = svg.selectAll(".six").data(seventeen).enter().append("rect").attr("class", "six").attr("x", (d)=>{return x_scale(d.state)}).attr("width", x_scale.bandwidth()).attr("y", (d)=>{return y_scale(d.six+d.five)}).attr("height", (d)=>{return h - y_scale(d.six)}).style("fill", "#d25c4d")
         var seven = svg.selectAll(".seven").data(seventeen).enter().append("rect").attr("class", "seven").attr("x", (d)=>{return x_scale(d.state)}).attr("width", x_scale.bandwidth()).attr("y", (d)=>{return y_scale(d.total)}).attr("height", (d)=>{return h - y_scale(d.seven)}).style("fill", "#b33040")
         var totals = svg.selectAll(".total").data(seventeen).enter().append("text").attr("class", "total").attr("x", (d)=> {return x_scale(d.state) + (x_scale.bandwidth()*(1-m))/2}).attr("y", (d)=>{return y_scale(d.total + 10)}).text((d)=>{return d.total}).style("font-size", "14px")
         
+        
+
+
         svg.append("g").append('text').attr('class', 'title').attr('y', -20).attr('x', (w)/2+hori_p).text("Visualizing Earthquake Counts by State").style("text-anchor","middle").style("font-size", "20px")
         svg.append("g").append('text').attr('class', 'title').attr('y', h+40).attr('x', (w+hori_p)/2).text("State").style("text-anchor","middle").style("font-size", "15px")
         svg.append("g").append('text').attr('class', 'title').attr("transform", "rotate(-90)").attr('x', (-h/2)).attr('y', -40).text("Number of Earthquakes").style("text-anchor","middle").style("font-size", "15px")
@@ -88,19 +93,18 @@
             svg.append("g").append('text').attr("x", w-35).attr("y", 5+  (25*i)).text(labels[i]).style("font-size", "14px").style("font-weight", "bold")
         }) 
 
-        var dropdown = document.getElementById("select")
-        dropdown.addEventListener("change", (event)=>{
-            // console.log("from eventlister")
-            event.preventDefault();
-            change(dropdown.value)
-        })
+        // var dropdown = document.getElementById("select")
+        // dropdown.addEventListener("change", (event)=>{
+        //     // console.log("from eventlister")
+        //     event.preventDefault();
+        //     change(dropdown.value)
+        // })
         
         svg.append("g").append('text').attr('class', 'title').attr('y', h+50).attr('x', w-50).text("aeissa3").style("text-anchor","end").style("font-size", "12px")
 
-        function change (year){
-            console.log("from function")
+        function change (){
 
-            
+            var year = d3.select('select').property('value')
             var yAxis = document.getElementById("yAxis")
             yAxis.parentNode.removeChild(yAxis)
 
