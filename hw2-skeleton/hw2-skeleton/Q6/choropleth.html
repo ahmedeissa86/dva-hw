@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<script type="text/javascript" src="../lib/d3.v5.min.js"></script>
+<script type="text/javascript" src="../lib/d3-scale-chromatic.v1.min.js"></script>
+<script type="text/javascript" src="../lib/d3-simple-slider.min.js"></script>
+<!-- <script type="text/javascript" src="../lib/d3-tip.min.js"></script> -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-tip/0.9.1/d3-tip.min.js" integrity="sha256-DCW2G+HXRTaX80n/cuqXdLtWpE59kVHmSBzwPRBHe/o=" crossorigin="anonymous"></script>
+<script type="text/javascript" src="../lib/topojson.v2.min.js"></script>
+
+<style>
+
+ 
+
+.states {
+  fill: none;
+  stroke:black;
+  stroke-linejoin: round;
+}
+
+.tip {
+  line-height: 1;
+  font-weight: bold;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  border-radius: 2px;
+  /* height: 20px;
+  width: 40px; */
+}
+
+
+</style>
+<body>
+
+    <div class="row align-items-left">
+        <div class="col-sm-2"><p id="value-"></p></div>
+        <div class="col-sm"><div id="slider"></div></div>
+    </div>
+<script>
+
+    try {
+        var vertical_p = 50
+        var hori_p = 75
+        var w = 1000 
+        var h = 500
+
+        var s = 15
+        var year = "2010"
+        var us = undefined
+        
+        var svg = d3.select("body").append("svg").attr("class", "map").attr("width", w +hori_p*2).attr("height", h+ vertical_p*2).append("g").attr("transform", "translate(" + hori_p + ", " + vertical_p + ")");
+        var earthquakes = {
+            "2010": d3.map(),
+            "2011": d3.map(),
+            "2012": d3.map(),
+            "2013": d3.map(),
+            "2014": d3.map(),
+            "2015": d3.map()
+        }
+        var projection = d3.geoAlbersUsa()
+        var path = d3.geoPath().projection(projection);
+        var log = d3.scaleLog()
+
+        var slider = d3.sliderBottom().min(2010).max(2015).width(150).ticks(6).step(1).default(2010).tickFormat((d)=>{ return d.toString()}).on("onchange", (value)=>{
+            year = value;
+            svg.selectAll(".labels").remove();
+            build();
+        })
+
+        svg.append("g").attr("y", "-20px").call(slider)
+
+        
+
+        var promises = [
+            d3.json("states-10m.json"),
+            d3.dsv(",","state-earthquakes.csv", (d)=>{
+                earthquakes["2010"].set(d.States, +d["2010"])
+                earthquakes["2011"].set(d.States, +d["2011"]),
+                earthquakes["2012"].set(d.States, +d["2012"]),
+                earthquakes["2013"].set(d.States, +d["2013"]),
+                earthquakes["2014"].set(d.States, +d["2014"]),
+                earthquakes["2015"].set(d.States, +d["2015"])
+    
+            }
+            )
+        ]
+        Promise.all(promises).then(data => {
+            us = (data[0]); 
+            build();
+
+            
+        })
+
+        function build(){
+
+            var tip = d3.tip().attr('class', "tip").offset([-10, -10]).html((d)=> {
+            // var result = "<p> State:" + d.property.name + "</p>; <p>Region: </p>; <p>Year: " + year.toString() + "</p>; <p>Earthquakes: " + earthquakes[year].get(d.properties.name) +"</p>";
+                console.log("what")
+                var result = "what"
+                return result
+            });
+
+            svg.call(tip)
+
+            var range = []
+            for (var x of earthquakes[year].values()){
+                range.push(x)
+            }
+            var max = d3.max(range)
+
+            var space = log(max)/8
+            range = []
+            for (var i = 0; i < 9; i++)
+                range.push (i*space)
+
+            var color = d3.scaleLinear().domain(range).range(d3.schemeReds[9])
+
+            svg.append("g").attr("class", "states").selectAll("path").data(topojson.feature(us, us.objects.states).features).enter().append("path").attr("d", path)
+            .attr("fill", (d)=>{ 
+                var v = (earthquakes[year].get(d.properties.name))
+                if (v == 0)
+                    return color(0);
+                return color(log(v))}).on("mouseover", tip.show).on("mouseout", tip.hide);
+
+
+            var g =svg.append("g").attr("class", "key").attr("transform", "translate(0,0)")
+            g.selectAll("rect").data(color.range()).enter().append("rect").attr("height", s).attr("width", s).attr("x", w-hori_p).attr("y", (d, i)=>{ return 15 + ((s+5)*i)}).attr("fill", (d)=> d)
+            g.selectAll("text").data(range).enter().append('text').attr("class", "labels").attr("x", w - hori_p + 20).attr("y", (d, i)=>{ return 27 + ((s+5)*i)}).text((d)=>{return d.toFixed(2)}).style("font-size", "12px")
+
+            g.append("text").attr("class", "caption").attr("x", w-hori_p).attr("y", 0).attr("fill", "#000").attr("text-anchor", "middle").attr("font-weight", "bold").text("Earthquake Frequency")
+            
+        }
+
+        function change (year){
+
+        }
+    } catch (error) {
+        console.log(error)   
+    }
+    </script>
+</body>
+</html>
