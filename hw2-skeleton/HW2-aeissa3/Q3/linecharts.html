@@ -16,20 +16,9 @@
         shape-rendering: crispEdges;
     }
 
-    @media print {
-        .pagebreak {
-            clear: both;
-            page-break-after: always;
-        }
-    }
-
 
 </style>
 <body>
-<div class="pagebreak" id="one"></div>
-<div class="pagebreak" id="two"></div>
-<div class="pagebreak" id="three"></div>
-<div class="pagebreak" id="four"></div>
 <script>
 
     d3.dsv(",", "earthquakes.csv", (d)=>{
@@ -69,7 +58,7 @@
         var line7 = d3.line().x((d)=>{return x_scale(d.year)}).y( (d)=>{return y_scale1(d.seven)})
         var line8 = d3.line().x((d)=>{return x_scale(d.year)}).y( (d)=>{return y_scale1(d.eight)})
 
-        var svg1 = d3.select("#one").append("svg").attr("width", w +hori_p*2).attr("height", h+ vertical_p*2).append("g").attr("transform", "translate(" + hori_p + ", " + vertical_p + ")");
+        var svg1 = d3.select("body").append("svg").attr("width", w +hori_p*2).attr("height", h+ vertical_p*2).append("g").attr("transform", "translate(" + hori_p + ", " + vertical_p + ")");
         svg1.append("g").attr("transform", "translate(0," + h + ")").call(x_axis)
         svg1.append("g").attr("transform", "translate(0," + 0 + ")").call(y_axis1)
         svg1.append("path").datum(dataset).attr("class", "line").attr("d", line5).style("stroke", '#FFC300')
@@ -78,7 +67,7 @@
         svg1.append("path").datum(dataset).attr("class", "line").attr("d", line8).style("stroke", '#900C3F')
         svg1.append("g").append('text').attr('class', 'title').attr('y', -20).attr('x', (w)/2).text("Earthquake Statistics for "+ x_min.getFullYear() + "-" + x_max.getFullYear()).style("text-anchor","middle").style("font-size", "18px").style("font-weight", "bold") 
 
-        var svg2 = d3.select("#two").append("svg").attr("width", w +hori_p*2).attr("height", (h+ vertical_p*2)).append("g").attr("transform", "translate(" + hori_p + ", " + vertical_p + ")");
+        var svg2 = d3.select("body").append("svg").attr("width", w +hori_p*2).attr("height", (h+ vertical_p*2)).append("g").attr("transform", "translate(" + hori_p + ", " + vertical_p + ")");
         svg2.append("g").attr("transform", "translate(0," + h + ")").call(x_axis)
         svg2.append("g").attr("transform", "translate(0," + 0 + ")").call(y_axis1)
         svg2.append("path").datum(dataset).attr("class", "line").attr("d", line5).style("stroke", '#FFC300')
@@ -97,7 +86,7 @@
         var line7c = d3.line().x((d)=>{return x_scale(d.year)}).y( (d)=>{return y_scale2(d.seven)})
         var line8c = d3.line().x((d)=>{return x_scale(d.year)}).y( (d)=>{return y_scale2(d.eight)})
 
-        var svg3 = d3.select("#three").append("svg").attr("width", w +hori_p*2).attr("height", (h+ vertical_p*2)).append("g").attr("transform", "translate(" + hori_p + ", " + vertical_p + ")");
+        var svg3 = d3.select("body").append("svg").attr("width", w +hori_p*2).attr("height", (h+ vertical_p*2)).append("g").attr("transform", "translate(" + hori_p + ", " + vertical_p + ")");
         svg3.append("g").attr("transform", "translate(0," + h + ")").call(x_axis)
         svg3.append("g").attr("transform", "translate(0," + 0 + ")").call(y_axis2)
         svg3.append("path").datum(dataset).attr("class", "line").attr("d", line5c).style("stroke", '#FFC300')
@@ -116,7 +105,7 @@
         var line7d = d3.line().x((d)=>{return x_scale(d.year)}).y( (d)=>{ if (d.seven == 0 ){return y_scale1(0)} else {return y_scale3(d.seven)}})
         var line8d = d3.line().x((d)=>{return x_scale(d.year)}).y( (d)=>{ if (d.eight == 0 ){return y_scale1(0)} else {return y_scale3(d.eight)}})
 
-        var svg4 = d3.select("#four").append("svg").attr("width", w +hori_p*2).attr("height", (h+ vertical_p*2)).append("g").attr("transform", "translate(" + hori_p + ", " + vertical_p + ")");
+        var svg4 = d3.select("body").append("svg").attr("width", w +hori_p*2).attr("height", (h+ vertical_p*2)).append("g").attr("transform", "translate(" + hori_p + ", " + vertical_p + ")");
         svg4.append("g").attr("transform", "translate(0," + h + ")").call(x_axis)
         svg4.append("g").attr("transform", "translate(0," + 0 + ")").call(y_axis3)
         svg4.append("path").datum(dataset).attr("class", "line").attr("d", line5d).style("stroke", '#FFC300')

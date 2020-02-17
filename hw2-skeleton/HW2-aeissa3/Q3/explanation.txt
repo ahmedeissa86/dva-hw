@@ -1,0 +1,1 @@
+Use log and sqrt scales when there are large variances in the data to remove skewness that creates and to show percentage change over time
